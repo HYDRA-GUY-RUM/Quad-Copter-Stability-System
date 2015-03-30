@@ -15,7 +15,6 @@ _start:
 	stwio r9, 0(r8)
 	stwio r9, 4(r8)					/* initialize DIR as well */
 
-	/* SET THRESHOLDS how? */
 
 
 readSensorOne:
@@ -43,10 +42,37 @@ readSensorTwo:
 	ldwio r12, 0(r8)				/* read sensor 2 value into r12 */
 	srli r12, r12, 27
 	andi r12, r12, 0x0f
-
-	#turn the motors on before comparing
 	
+readSensorThree:
+	/* assume r8 has JP1 */
+	movia r11, 0xfffeffff			/* enable sensor 3, disable all motors */
+	stwio r11, 0(r8)
+	ldwio r5, 0(r8)					/* check for valid data at sensor 2 */
+	srli r5, r5, 17					/* bit 15 equals valid bit for sensor 2 */
+	andi r5, r5, 0x1 				/* mask */
+	bne r0, r5, readSensorTwo		/* check if low indicated polling data at sensor 2 is valid */
+
+	ldwio r13, 0(r8)				/* read sensor 3 value into r13 */
+	srli r13, r13, 27
+	andi r13, r13, 0x0f
+
+readSensorFour:
+	/* assume r8 has JP1 */
+	movia r11, 0xfffbffff			/* enable sensor 4, disable all motors */
+	stwio r11, 0(r8)
+	ldwio r5, 0(r8)					/* check for valid data at sensor 2 */
+	srli r5, r5, 19					/* bit 15 equals valid bit for sensor 2 */
+	andi r5, r5, 0x1 				/* mask */
+	bne r0, r5, readSensorTwo		/* check if low indicated polling data at sensor 2 is valid */
+
+	ldwio r14, 0(r8)				/* read sensor 3 value into r12 */
+	srli r14, r14, 27
+	andi r14, r14, 0x0f
+	
+	#turn the motors on before comparing
 	/* compare the values of sensor 1 (r10) and sensor 2 (r12) */
+	
+	
 	beq r10, r12, readSensorOne
 	bgt r10, r12, motor0turnLeft
 
